@@ -1,0 +1,490 @@
+; ClassicWB 68K v28 Package Install Script
+; ----------------------------------------
+;
+; Author: Henrik Noerfjand Stengaard 
+; Date: 2018-05-12
+;
+; This script extracts and installs ClassicWB 68K v28 created by Bloodwych from EAB. 
+; With permission from Bloodwych it's been converted to a package for HstWB Installer.
+; Original version of ClassicWB 68K can be downloaded from http://classicwb.abime.net/.
+; The install script is based on S/Startup-Sequence from System.hdf with following changes:
+; - Removed Workbench installation.
+; - Paths has been changed: SYS: to SYSTEMDIR:, C: to SYSTEMDIR:C/, L: to SYSTEMDIR:L/.
+; - Modified versions of Temp enable and disable option scripts with changed paths.
+; - Removed all "press enter to continue" expect last one used after installation complete message is shown.
+; - Removed and reduced waits.
+; - Adjusted text spacing.
+
+; Copy readme and screenshots to locale help for ClassicWB 68K
+IF NOT EXISTS SYSTEMDIR:Locale/Help/ClassicWB-68K
+  makepath >NIL: SYSTEMDIR:Locale/Help/ClassicWB-68K
+  IF EXISTS SYSTEMDIR:Prefs/Env-Archive/Sys/def_drawer.info
+    makeicon >NIL: SYSTEMDIR:Locale/Help/ClassicWB-68K FROM SYSTEMDIR:Prefs/Env-Archive/Sys/def_drawer.info 
+  ELSE
+    makeicon >NIL: SYSTEMDIR:Locale/Help/ClassicWB-68K
+  ENDIF
+ENDIF
+IF NOT EXISTS SYSTEMDIR:Locale/Help.info
+  IF EXISTS SYSTEMDIR:Prefs/Env-Archive/Sys/def_drawer.info
+    makeicon >NIL: SYSTEMDIR:Locale/Help FROM SYSTEMDIR:Prefs/Env-Archive/Sys/def_drawer.info 
+  ELSE
+    makeicon >NIL: SYSTEMDIR:Locale/Help
+  ENDIF
+ENDIF
+IF NOT EXISTS SYSTEMDIR:Locale.info
+  IF EXISTS SYSTEMDIR:Prefs/Env-Archive/Sys/def_drawer.info
+    makeicon >NIL: SYSTEMDIR:Locale FROM SYSTEMDIR:Prefs/Env-Archive/Sys/def_drawer.info 
+  ELSE
+    makeicon >NIL: SYSTEMDIR:Locale
+  ENDIF
+ENDIF
+copy >NIL: PACKAGEDIR:README SYSTEMDIR:Locale/Help/ClassicWB-68K
+copy >NIL: PACKAGEDIR:README.guide SYSTEMDIR:Locale/Help/ClassicWB-68K
+copy >NIL: PACKAGEDIR:README.info SYSTEMDIR:Locale/Help/ClassicWB-68K
+IF NOT EXISTS SYSTEMDIR:Locale/Help/ClassicWB-68K/screenshots
+  makepath >NIL: SYSTEMDIR:Locale/Help/ClassicWB-68K/screenshots
+ENDIF
+copy >NIL: PACKAGEDIR:screenshots/#?.iff SYSTEMDIR:Locale/Help/ClassicWB-68K/screenshots
+
+; Extract classicwb 68k v28 zip to systemdir
+echo "Installing ClassicWB 68K..." 
+unzip -qq -o -x PACKAGEDIR:classicwb_68k_v28.zip -d SYSTEMDIR:
+
+; Copy scsi device
+IF EXISTS DEVS:scsi.device
+  COPY >NIL: DEVS:scsi.device SYSTEMDIR:Devs
+ENDIF
+
+; Install ClassicWB from S/Startup-Sequence
+; 68K
+copy SYSTEMDIR:T/Science SYSTEMDIR:S CLONE
+delete >NIL: SYSTEMDIR:T/Science
+delete >NIL: SYSTEMDIR:S/startup-sequence
+rename SYSTEMDIR:S/Science SYSTEMDIR:S/Startup-Sequence
+
+IF EXISTS SYSTEMDIR:C/LoadWB.temp
+  copy >NIL: SYSTEMDIR:C/LoadWB.temp SYSTEMDIR:C/LoadWB
+  delete >NIL: SYSTEMDIR:C/LoadWB.temp
+ENDIF
+
+delete >NIL: SYSTEMDIR:S/Workbench3.1
+delete >NIL: SYSTEMDIR:S/Extras3.1
+delete >NIL: SYSTEMDIR:S/Install3.1
+delete >NIL: SYSTEMDIR:S/Storage3.1
+delete >NIL: SYSTEMDIR:S/Locale3.1
+
+IF EXISTS SYSTEMDIR:T/z
+  delete >NIL: SYSTEMDIR:T/z
+EndIF
+IF EXISTS SYSTEMDIR:T/zz
+  delete >NIL: SYSTEMDIR:T/zz
+EndIF
+
+IF EXISTS SYSTEMDIR:System/IconLib/S/Startup-Sequence30
+  copy SYSTEMDIR:System/IconLib/S/Startup-Sequence30 SYSTEMDIR:System/IconLib/S/Startup-Sequence CLONE
+ENDIF
+
+LAB OPTIONS
+
+  cd SYSTEMDIR:
+  ;C:MakeDir RAM:T RAM:Clipboards RAM:ENV RAM:ENV/Sys
+  copy >NIL: SYSTEMDIR:Prefs/Env-Archive RAM:ENV ALL NOREQ
+  Assign >NIL: ENV: RAM:ENV
+  Protect FONTS:#? +RWED ALL QUIET
+  SYSTEMDIR:System/FixFonts
+
+LAB THEME
+
+IF EXISTS SYSTEMDIR:Temp/WB13.zip
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "Choose Theme:"
+  echo "-------------"
+  echo ""
+  echo "Thanks for using the ClassicWB 68000 Edition!"
+  echo ""
+  echo "This Workbench has the option of using the Normal"
+  echo "8 colour ClassicWB Theme or an old school looking"
+  echo "4 colour WB 1.3 Theme."
+ELSE
+  SKIP OLDICONS
+EndIF
+
+SYSTEMDIR:C/Requestchoice >ENV:Choice "Choose Theme""Choose:""ClassicWB""WB 1.3"
+
+IF $Choice EQ "1"
+  SKIP CLASSICWB
+ENDIF
+IF $Choice EQ "0"
+  SKIP WB13
+ENDIF
+
+LAB CLASSICWB
+
+  delete >NIL: SYSTEMDIR:Temp/WB13.zip
+  SKIP OLDICONS
+
+LAB WB13
+
+  cls
+  echo ""
+  echo "Installing..."
+  echo ""
+  delete >NIL: SYSTEMDIR:Icons ALL
+  unzip >NIL: -o SYSTEMDIR:Temp/WB13.zip -d SYSTEMDIR:
+  echo ""
+  echo "Workbench 1.3 support installed."
+  echo ""
+  delete >NIL: SYSTEMDIR:Temp/WB13.zip
+  delete >NIL: SYSTEMDIR:Temp/OldIcons_enable
+  wait 1
+
+LAB OLDICONS
+
+IF EXISTS SYSTEMDIR:Temp/OldIcons_enable
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "Old Look Icons:"
+  echo "---------------"
+  echo ""
+  echo "If you prefer the look of borderless icons, like those"
+  echo "found in Workbench 1.3, then this allows the old look"
+  echo "to return to Workbench 3."
+  echo ""
+  echo "This option can be enabled/disabled at anytime via the"
+  echo "Settings->Components menu."
+ELSE
+  SKIP STACK
+EndIF
+
+SYSTEMDIR:C/Requestchoice >ENV:Choice "OldIcons""Choose:""Enable""Disable"
+
+IF $Choice EQ "1"
+  SKIP ENABLE
+ENDIF
+IF $Choice EQ "0"
+  SKIP DISABLE
+ENDIF
+
+LAB ENABLE
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "Installing..."
+  echo ""
+  execute PACKAGEDIR:Temp/OldIcons_enable
+  echo ""
+  echo "OldIcon support installed."
+  echo ""
+  delete >NIL: SYSTEMDIR:Temp/OldIcons_enable
+  SKIP STACK
+
+LAB DISABLE
+
+  delete >NIL: SYSTEMDIR:Temp/OldIcons_enable
+
+LAB STACK
+
+IF EXISTS SYSTEMDIR:Temp/StackAttack_enable
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "StackAttack:"
+  echo "------------"
+  echo ""
+  echo "ClassicWB already has stack settings that are larger"
+  echo "than default in certain cases to improve stability."
+  echo ""
+  echo "StackAttack makes sure that all processes are launched"
+  echo "with a pre-defined minimum stack to improve stability"
+  echo "in certain situations, with the downside of using a"
+  echo "little extra RAM."
+  echo ""
+  echo "This option can be enabled/disabled at anytime via the"
+  echo "Settings->Components menu."
+ELSE
+  SKIP HDENV
+EndIF
+
+SYSTEMDIR:C/Requestchoice >ENV:Choice "StackAttack""Choose:""Enable""Disable"
+
+IF $Choice EQ "1"
+  SKIP ENABLE
+ENDIF
+IF $Choice EQ "0"
+  SKIP DISABLE
+ENDIF
+
+LAB ENABLE
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "Installing..."
+  echo ""
+  execute PACKAGEDIR:Temp/StackAttack_enable
+  echo ""
+  echo "StackAttack support installed."
+  echo ""
+  delete >NIL: SYSTEMDIR:Temp/StackAttack_enable
+  SKIP HDENV
+
+LAB DISABLE
+
+  delete >NIL: SYSTEMDIR:Temp/StackAttack_enable
+
+LAB HDENV
+
+IF EXISTS SYSTEMDIR:Temp/HDEnv_enable
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "Hard Drive ENV:"
+  echo "---------------"
+  echo ""
+  echo "Workbench stores many settings and preferences in a"
+  echo "RAM drawer called ENV:"
+  echo ""
+  echo "This allows quick access, but if you have a lot of"
+  echo "programs installed it can take up a lot of RAM."
+  echo ""
+  echo "Hard Drive ENV moves the ENV: drawer to the Hard Drive"
+  echo "saving memory."
+  echo ""
+  echo "This option can be enabled/disabled at anytime via the"
+  echo "Settings->Components menu."
+ELSE
+  SKIP ANTICLICK
+EndIF
+
+SYSTEMDIR:C/Requestchoice >ENV:Choice "Hard Drive ENV""Choose:""Enable""Disable"
+
+IF $Choice EQ "1"
+  SKIP ENABLE
+ENDIF
+IF $Choice EQ "0"
+  SKIP DISABLE
+ENDIF
+
+LAB ENABLE
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "Installing..."
+  echo ""
+  execute PACKAGEDIR:Temp/HDEnv_enable
+  echo ""
+  echo "Hard Drive ENV support installed."
+  echo ""
+  delete >NIL: SYSTEMDIR:Temp/HDEnv_enable
+  SKIP ANTICLICK
+
+LAB DISABLE
+
+  delete >NIL: SYSTEMDIR:Temp/HDEnv_enable
+  
+LAB ANTICLICK
+
+IF EXISTS SYSTEMDIR:Temp/AntiClick_disable
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "AntiClick"
+  echo "---------"
+  echo ""
+  echo "Constant floppy drive clicking can either be nostalgic"
+  echo "or annoying. This patch prevents the constant clicking"
+  echo "in Workbench."
+  echo ""
+  echo "If you drive continues to click after enabling this"
+  echo "patch, please disable it immediately as your drive is"
+  echo "incompatible."
+  echo ""
+  echo "This option can be enabled/disabled at anytime via the"
+  echo "Settings->Components menu." 
+ELSE
+  SKIP SMARTWIN
+EndIF
+
+SYSTEMDIR:C/Requestchoice >ENV:Choice "AntiClick""Choose:""Enable""Disable"
+
+IF $Choice EQ "1"
+  SKIP ENABLE
+ENDIF
+IF $Choice EQ "0"
+  SKIP DISABLE
+ENDIF
+
+LAB ENABLE
+
+  delete >NIL: SYSTEMDIR:Temp/AntiClick_disable
+  SKIP SMARTWIN
+
+LAB DISABLE
+  cls
+  echo ""
+  echo "Removing..."
+  echo ""
+  execute PACKAGEDIR:Temp/AntiClick_disable
+  echo ""
+  echo "AntiClick support removed."
+  echo ""
+  delete >NIL: SYSTEMDIR:Temp/AntiClick_disable
+  wait 1
+
+LAB SMARTWIN
+
+IF EXISTS SYSTEMDIR:Temp/SmartWin_enable
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "SmartWin Patch:"
+  echo "---------------"
+  echo ""
+  echo "Workbench normally refreshes windows using a slower"
+  echo "method, saving a little mem but sacrificing speed."
+  echo ""
+  echo "SmartWin forces windows and applications to use a"
+  echo "faster method, most notably seen when redrawing lots"
+  echo "of windows or using the depth gadget."
+  echo ""
+  echo "VirusZ lists this patch as Suspicious if enabled due"
+  echo "to it being unrecognized, but it is totally harmless."
+  echo ""
+  echo "This option can be enabled/disabled at anytime via the"
+  echo "Settings->Components menu."
+ELSE
+  SKIP BORDER
+EndIF
+
+SYSTEMDIR:C/Requestchoice >ENV:Choice "SmartWin""Choose:""Enable""Disable"
+
+IF $Choice EQ "1"
+  SKIP ENABLE
+ENDIF
+IF $Choice EQ "0"
+  SKIP DISABLE
+ENDIF
+
+LAB ENABLE
+  cls
+  echo ""
+  echo "Installing..."
+  echo ""
+  execute PACKAGEDIR:Temp/SmartWin_enable
+  echo ""
+  echo "SmartWin support installed."
+  echo ""
+  delete >NIL: SYSTEMDIR:Temp/SmartWin_enable
+  wait 1
+  SKIP BORDER
+
+LAB DISABLE
+
+  delete >NIL: SYSTEMDIR:Temp/SmartWin_enable
+  
+LAB BORDER
+
+IF EXISTS SYSTEMDIR:Temp/BorderBlank_enable
+  cls
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+  echo "Black Border:"
+  echo "-------------"
+  echo ""
+  echo "Workbench normally has a matching border surround. This"
+  echo "can be changed to a black border."
+  echo ""
+  echo "This option can be enabled/disabled at anytime via the"
+  echo "Settings->Components menu."
+ELSE
+  SKIP END
+EndIF
+
+SYSTEMDIR:C/Requestchoice >ENV:Choice "BlackBorder""Choose:""Enable""Disable"
+
+IF $Choice EQ "1"
+  SKIP ENABLE
+ENDIF
+IF $Choice EQ "0"
+  SKIP DISABLE
+ENDIF
+
+LAB ENABLE
+  cls
+  echo ""
+  echo "Installing..."
+  echo ""
+  execute PACKAGEDIR:Temp/BorderBlank_enable
+  echo ""
+  echo "Black Border support installed."
+  echo ""
+  delete >NIL: SYSTEMDIR:Temp/BorderBlank_enable
+  wait 1
+  SKIP END
+
+LAB DISABLE
+
+  delete >NIL: SYSTEMDIR:Temp/BorderBlank_enable
+
+LAB END
+
+cls
+echo ""
+echo "Installation Complete!"
+echo ""
+echo "Check the website documentation for details of the"
+echo "multiboot and multi-partition features, large HD >4GB"
+echo "support and how to add WHDLoad games."
+echo ""
+echo "The MyFiles/Install drawer contains many useful addons"
+echo "including CDROM drivers."
+echo ""
+echo "Also check out the Settings->Components menu to access"
+echo "more options like HardDrive ENV, BlazeWPC, IconBeFast,"
+echo "TinyMeter, TagLiFE, PeterKs PNG OS35+ Icon Support"
+echo "and PatchRAM."
+echo ""
+ask "Press RETURN to continue."
+cls
