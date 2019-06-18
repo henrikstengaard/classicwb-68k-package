@@ -1,6 +1,11 @@
 {
+    "selectionIds":
+    [
+        "classicwb",
+        "amigaos"
+    ],
     "name": "ClassicWB 68K",
-    "version": "28.0.1",
+    "version": "28.0.2",
     "priority": 1,
     "assigns":
     [
