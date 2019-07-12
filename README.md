@@ -12,7 +12,7 @@ Original version of ClassicWB 68K can be downloaded from http://classicwb.abime.
 
 ## Requirements
 
-ClassicWB 68K package can be installed on any Amiga with Workbench 3.1 and about 35MB free space on a harddrive for installation.
+ClassicWB 68K package can be installed on any Amiga with Amiga OS 3.1 or 3.1.4 and about 35MB free space on a harddrive for installation.
 
 ## Installation
 
@@ -41,10 +41,18 @@ The install script for HstWB Installer is based on S/Startup-Sequence from Class
 - Removed all "press enter to continue" expect last one used after installation complete message is shown.
 - Removed and reduced waits.
 - Adjusted text spacing.
+- Added support for Amiga OS 3.1.4:
+  - Disabled PatchRAM and TagLiFE optimizations.
+  - Added LoadModule ROMUPDATE to support Kickstart 3.1 being patched to 3.1.4.
+  - Added version checking of DEVS:scsi.device, so it only will be loaded if scsi.device in memory/resident is less than v43.45. 
 
 ## Screenshots
 
 Screenshots of ClassicWB 68K from http://classicwb.abime.net/classicweb/68kpics.htm.
+
+![ClassicWB 68K 3.1.4 1](screenshots/classicwb_68k_3.1.4_1.png?raw=true)
+
+![ClassicWB 68K 3.1.4 2](screenshots/classicwb_68k_3.1.4_2.png?raw=true)
 
 ![ClassicWB 68K 1](screenshots/classicwb_68k_1.png?raw=true)
 
