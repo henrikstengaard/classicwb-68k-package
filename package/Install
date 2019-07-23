@@ -80,7 +80,7 @@ IF "$amigaosversion" EQ "3.1.4"
 
   ; install patch amiga os 3.1.4.1, if it exists
   IF EXISTS "SYSTEMDIR:S/Install-Patch-Amiga-OS-3141"
-    Execute >NIL: "SYSTEMDIR:S/Install-Patch-Amiga-OS-3141" SYS SYSTEMDIR
+    Execute "SYSTEMDIR:S/Install-Patch-Amiga-OS-3141" SYS SYSTEMDIR QUIET
   ENDIF
 ELSE
   ; extract classicwb 68k
