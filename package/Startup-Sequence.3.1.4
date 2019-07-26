@@ -1,6 +1,7 @@
 ;ClassicWB Startup-Sequence
 ;--------------------------
 ;68K
+;Amiga OS 3.1.4
 
 ; set failat to 21
 FailAt 21
@@ -41,6 +42,7 @@ EndIF
 Unset MouseInput
 
 C:SetPatch QUIET
+C:CPU CHECKINSTALL
 
 IF EXISTS C:StackAttack
   C:StackAttack
