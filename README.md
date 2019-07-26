@@ -55,6 +55,8 @@ Screenshots of ClassicWB 68K from http://classicwb.abime.net/classicweb/68kpics.
 
 ![ClassicWB 68K 3.1.4 2](screenshots/classicwb_68k_3.1.4_2.png?raw=true)
 
+![ClassicWB 68K 3.1.4 3](screenshots/classicwb_68k_3.1.4_3.png?raw=true)
+
 ![ClassicWB 68K 1](screenshots/classicwb_68k_1.png?raw=true)
 
 ![ClassicWB 68K 2](screenshots/classicwb_68k_2.png?raw=true)
