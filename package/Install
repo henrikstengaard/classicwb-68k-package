@@ -2,7 +2,7 @@
 ; ----------------------------------------
 ;
 ; Author: Henrik Noerfjand Stengaard 
-; Date: 2019-07-23
+; Date: 2021-08-15
 ;
 ; This script extracts and installs ClassicWB 68K v28 created by Bloodwych from EAB. 
 ; With permission from Bloodwych it's been converted to a package for HstWB Installer.
@@ -14,10 +14,12 @@
 ; - Removed all "press enter to continue" expect last one used after installation complete message is shown.
 ; - Removed and reduced waits.
 ; - Adjusted text spacing.
-; - Added support for Amiga OS 3.1.4:
+; - Added support for Amiga OS 3.2 and 3.1.4:
 ;   - Added LoadModule ROMUPDATE to support Kickstart 3.1 being patched to 3.1.4.
 ;   - Added version checking of DEVS:scsi.device, so it only will be loaded if scsi.device in memory/resident is less than v43.45.
 ;   - Added install patch Amiga OS 3.1.4.1, if Amiga OS 3.1.4.1 update is installed.
+;   - Added Amiga OS 3.2 startup, if Amiga OS 3.2 is installed.
+;   - Disabled StackAttack, HDEnv, SmartWin, Border Blank.
 
 
 ; Copy readme and screenshots to locale help for ClassicWB 68K
@@ -53,12 +55,18 @@ copy >NIL: PACKAGEDIR:screenshots/#?.iff SYSTEMDIR:Locale/Help/ClassicWB-68K/scr
 
 
 ; detect amiga os version
-set amigaosversion ""
+set amigaosversion "3.1"
 IF EXISTS "SYSTEMDIR:Libs/workbench.library"
   ; set amiga os version to 3.1.4, if workbench.library file is equal or greater than v45.194
   Version >NIL: "SYSTEMDIR:Libs/workbench.library" 45 194 FILE
   IF $RC EQ 0 VAL
     set amigaosversion "3.1.4"
+  ENDIF
+
+  ; set amiga os version to 3.2, if workbench.library file is equal or greater than v47.33
+  Version >NIL: "SYSTEMDIR:Libs/workbench.library" 47 33 FILE
+  IF $RC EQ 0 VAL
+    set amigaosversion "3.2"
   ENDIF
 ELSE
   ; set amiga os version to 3.1.4, if loaded workbench.library is equal or greater than v45.194
@@ -66,28 +74,67 @@ ELSE
   IF $RC EQ 0 VAL
     set amigaosversion "3.1.4"
   ENDIF
+
+  ; set amiga os version to 3.2, if loaded workbench.library is equal or greater than v47.33
+  Version >NIL: "workbench.library" 47 33
+  IF $RC EQ 0 VAL
+    set amigaosversion "3.2"
+  ENDIF
 ENDIF
+
 
 ; Extract classicwb 68k v28 zip to systemdir
 echo "Installing ClassicWB 68K..." 
 
-IF "$amigaosversion" EQ "3.1.4"
-  ; extract classicwb 68k excluding files conflicting with amiga os 3.1.4
+IF NOT "$amigaosversion" EQ "3.1"
+  ; extract classicwb 68k excluding files conflicting with amiga os 3.2 and 3.1.4
   unzip -qq -o -x PACKAGEDIR:classicwb_68k_v28.zip -d SYSTEMDIR: -x *LoadModule *LoadResource *MakeLink *SetPatch *CDFileSystem *CrossDOSFileSystem *FastFileSystem *DANSK.crossdos *INTL.crossdos *MAC.crossdos *68040.library *asl.library *Icon.Library *lowlevel.library *nonvolatile.library *realtime.library
 
-  ; copy startup-sequence for amiga os 3.1.4
-  Copy >NIL: PACKAGEDIR:Startup-Sequence.3.1.4 SYSTEMDIR:S/Startup-Sequence
+  IF "$amigaosversion" EQ "3.2"
+    ; copy startup-sequence for amiga os 3.2
+    Copy >NIL: PACKAGEDIR:Patches/Startup-Sequence.3.2 SYSTEMDIR:S/Startup-Sequence
+  ELSE
+    IF "$amigaosversion" EQ "3.1.4"
+      ; copy startup-sequence for amiga os 3.1.4
+      Copy >NIL: PACKAGEDIR:Patches/Startup-Sequence.3.1.4 SYSTEMDIR:S/Startup-Sequence
 
-  ; install patch amiga os 3.1.4.1, if it exists
-  IF EXISTS "SYSTEMDIR:S/Install-Patch-Amiga-OS-3141"
-    Execute "SYSTEMDIR:S/Install-Patch-Amiga-OS-3141" SYS SYSTEMDIR QUIET
+      ; install patch amiga os 3.1.4.1, if it exists
+      IF EXISTS "SYSTEMDIR:S/Install-Patch-Amiga-OS-3141"
+        Execute "SYSTEMDIR:S/Install-Patch-Amiga-OS-3141" SYS SYSTEMDIR QUIET
+      ENDIF
+    ENDIF
   ENDIF
 ELSE
   ; extract classicwb 68k
   unzip -qq -o -x PACKAGEDIR:classicwb_68k_v28.zip -d SYSTEMDIR:
 
   ; copy startup-sequence for amiga os 3.1
-  Copy >NIL: PACKAGEDIR:Startup-Sequence.3.1 SYSTEMDIR:S/Startup-Sequence
+  Copy >NIL: PACKAGEDIR:Patches/Startup-Sequence.3.1 SYSTEMDIR:S/Startup-Sequence
+ENDIF
+
+; set harddisk icon
+set harddiskicon ""
+IF EXISTS "SYSTEMDIR:Prefs/Env-Archive/Sys/def_harddisk.info"
+  set harddiskicon "SYSTEMDIR:Prefs/Env-Archive/Sys/def_harddisk.info"
+ELSE
+  IF EXISTS "SYSTEMDIR:Disk.info"
+    set harddiskicon "SYSTEMDIR:Disk.info"
+  ENDIF
+ENDIF
+
+; update disk icon, if harddisk icon exists
+IF NOT "$harddiskicon" EQ ""
+  ; update dh1 disk icon, if dh1: device exists
+  Assign >NIL: EXISTS DH1:
+  IF $RC EQ 0 VAL
+    Copy >NIL: "$harddiskicon" "DH1:Disk.info"
+  ENDIF
+
+  ; update dh2 disk icon, if dh2: device exists
+  Assign >NIL: EXISTS DH2:
+  IF $RC EQ 0 VAL
+    Copy >NIL: "$harddiskicon" "DH2:Disk.info"
+  ENDIF
 ENDIF
 
 ; Copy scsi device
@@ -236,6 +283,13 @@ LAB DISABLE
   delete >NIL: SYSTEMDIR:Temp/OldIcons_enable
 
 LAB STACK
+
+; disable stack attack, hd env and skip to anticlick, if amiga os is not 3.1
+IF NOT "$amigaosversion" EQ "3.1"
+  delete >NIL: SYSTEMDIR:Temp/StackAttack_enable
+  delete >NIL: SYSTEMDIR:Temp/HDEnv_enable
+  SKIP ANTICLICK
+ENDIF 
 
 IF EXISTS SYSTEMDIR:Temp/StackAttack_enable
   cls
@@ -404,6 +458,13 @@ LAB DISABLE
   wait 1
 
 LAB SMARTWIN
+
+; disable smart win, border blank and skip to end, if amiga os is not 3.1
+IF NOT "$amigaosversion" EQ "3.1"
+  delete >NIL: SYSTEMDIR:Temp/SmartWin_enable
+  delete >NIL: SYSTEMDIR:Temp/BorderBlank_enable
+  SKIP END
+ENDIF
 
 IF EXISTS SYSTEMDIR:Temp/SmartWin_enable
   cls
