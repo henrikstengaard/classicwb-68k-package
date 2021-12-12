@@ -1,0 +1,10 @@
+; Boot Patches Startup
+; --------------------
+
+IF EXISTS C:PatchRAM
+  C:PatchRAM
+EndIF
+
+IF EXISTS C:TagLiFE
+  C:TagLiFE
+EndIF
