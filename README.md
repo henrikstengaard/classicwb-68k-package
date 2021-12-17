@@ -51,7 +51,7 @@ The install script for HstWB Installer is based on S/Startup-Sequence from Class
 
 ## Screenshots
 
-Screenshots of ClassicWB 68K from http://classicwb.abime.net/classicweb/68kpics.htm.
+Screenshots of ClassicWB 68K installed with Amiga OS 3.2.
 
 ![ClassicWB 68K 3.2 1](screenshots/classicwb_68k_3.2_1.png?raw=true)
 
@@ -59,11 +59,15 @@ Screenshots of ClassicWB 68K from http://classicwb.abime.net/classicweb/68kpics.
 
 ![ClassicWB 68K 3.2 3](screenshots/classicwb_68k_3.2_3.png?raw=true)
 
+Screenshots of ClassicWB 68K installed with Amiga OS 3.1.4.
+
 ![ClassicWB 68K 3.1.4 1](screenshots/classicwb_68k_3.1.4_1.png?raw=true)
 
 ![ClassicWB 68K 3.1.4 2](screenshots/classicwb_68k_3.1.4_2.png?raw=true)
 
 ![ClassicWB 68K 3.1.4 3](screenshots/classicwb_68k_3.1.4_3.png?raw=true)
+
+Screenshots of ClassicWB 68K from http://classicwb.abime.net/classicweb/68kpics.htm.
 
 ![ClassicWB 68K 1](screenshots/classicwb_68k_1.png?raw=true)
 
